@@ -1,0 +1,152 @@
+[12:29:29.325] 
+[12:29:29.325] ==============================================================================
+[12:29:29.325] FASE 1 — ARRANQUE DEL CLUSTER Y ELECCION DEL PRIMER LIDER
+[12:29:29.325] ==============================================================================
+[12:29:29.325] Se inician 5 nodos en estado FOLLOWER. Ninguno conoce a un lider,
+[12:29:29.325] por lo que el primero cuyo election timeout expire se postulara.
+[12:29:29.325] Quorum necesario para decidir: 3 de 5 nodos.
+[12:29:29.325] 
+[12:29:30.998]  nodo-2 | T1  | CANDIDATE | ** ELECTION TIMEOUT ** inicia eleccion para el term 1 (se auto-vota, 1/3 votos necesarios)
+[12:29:31.006]  nodo-3 | T1  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-2)
+[12:29:31.006]  nodo-3 | T1  | FOLLOWER  | RequestVote de nodo-2 (term 1) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:31.019]  nodo-4 | T1  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-2)
+[12:29:31.019]  nodo-4 | T1  | FOLLOWER  | RequestVote de nodo-2 (term 1) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:31.019]  nodo-2 | T1  | CANDIDATE | recibe voto de nodo-3 (2/3 necesarios)
+[12:29:31.027]  nodo-1 | T1  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-2)
+[12:29:31.027]  nodo-1 | T1  | FOLLOWER  | RequestVote de nodo-2 (term 1) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:31.027]  nodo-5 | T1  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-2)
+[12:29:31.028]  nodo-5 | T1  | FOLLOWER  | RequestVote de nodo-2 (term 1) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:31.033]  nodo-2 | T1  | CANDIDATE | recibe voto de nodo-5 (3/3 necesarios)
+[12:29:31.033]  nodo-2 | T1  | LEADER    | *** ELECTO LIDER del term 1 con 3/5 votos ***
+[12:29:31.656] 
+[12:29:31.656] >>> RESULTADO FASE 1: lider electo = nodo-2 (term 1)
+[12:29:31.656] 
+[12:29:31.656] --- ESTADO TRAS LA PRIMERA ELECCION ---
+[12:29:31.656] NODO     ESTADO     TERM  COMMIT  LOG                         MAQUINA DE ESTADOS
+[12:29:31.656] nodo-1   FOLLOWER   1     0       (vacio)                     {}
+[12:29:31.656] nodo-2   LEADER     1     0       (vacio)                     {}
+[12:29:31.656] nodo-3   FOLLOWER   1     0       (vacio)                     {}
+[12:29:31.656] nodo-4   FOLLOWER   1     0       (vacio)                     {}
+[12:29:31.656] nodo-5   FOLLOWER   1     0       (vacio)                     {}
+[12:29:31.656] 
+[12:29:31.656] 
+[12:29:31.656] ==============================================================================
+[12:29:31.656] FASE 2 — PROPUESTA DEL CLIENTE: 'A=1' (replicacion de log)
+[12:29:31.656] ==============================================================================
+[12:29:31.656] El cliente contacta al lider nodo-2 y solicita fijar A=1.
+[12:29:31.656] El lider anexa la entrada a su log y la replica con AppendEntries.
+[12:29:31.656] Solo cuando la mayoria confirma, la entrada se compromete (commit).
+[12:29:31.656] 
+[12:29:31.656]  nodo-2 | T1  | LEADER    | >>> PROPUESTA DEL CLIENTE 'A=1' aceptada como entrada #1 (term 1); replicando...
+[12:29:31.672]  nodo-4 | T1  | FOLLOWER  | replica 1 entrada(s) de nodo-2: ['A=1'] -> log=1 entradas
+[12:29:31.702]  nodo-1 | T1  | FOLLOWER  | replica 1 entrada(s) de nodo-2: ['A=1'] -> log=1 entradas
+[12:29:31.702]  nodo-3 | T1  | FOLLOWER  | replica 1 entrada(s) de nodo-2: ['A=1'] -> log=1 entradas
+[12:29:31.719]  nodo-5 | T1  | FOLLOWER  | replica 1 entrada(s) de nodo-2: ['A=1'] -> log=1 entradas
+[12:29:31.725]  nodo-2 | T1  | LEADER    | ### CONSENSO ALCANZADO ### entrada #1 'A=1' replicada en 3/5 nodos (mayoria) -> COMMIT
+[12:29:31.726]  nodo-2 | T1  | LEADER    | aplica entrada #1 'A=1' -> estado={'A': '1'}
+[12:29:32.076]  nodo-5 | T1  | FOLLOWER  | aplica entrada #1 'A=1' -> estado={'A': '1'}
+[12:29:32.083]  nodo-3 | T1  | FOLLOWER  | aplica entrada #1 'A=1' -> estado={'A': '1'}
+[12:29:32.095]  nodo-4 | T1  | FOLLOWER  | aplica entrada #1 'A=1' -> estado={'A': '1'}
+[12:29:32.098]  nodo-1 | T1  | FOLLOWER  | aplica entrada #1 'A=1' -> estado={'A': '1'}
+[12:29:33.702] 
+[12:29:33.702] --- ESTADO TRAS COMPROMETER 'A=1' ---
+[12:29:33.702] NODO     ESTADO     TERM  COMMIT  LOG                         MAQUINA DE ESTADOS
+[12:29:33.702] nodo-1   FOLLOWER   1     1       A=1                         {'A': '1'}
+[12:29:33.702] nodo-2   LEADER     1     1       A=1                         {'A': '1'}
+[12:29:33.702] nodo-3   FOLLOWER   1     1       A=1                         {'A': '1'}
+[12:29:33.702] nodo-4   FOLLOWER   1     1       A=1                         {'A': '1'}
+[12:29:33.702] nodo-5   FOLLOWER   1     1       A=1                         {'A': '1'}
+[12:29:33.702] 
+[12:29:33.702] 
+[12:29:33.702] ==============================================================================
+[12:29:33.702] FASE 3 — FALLO SIMULADO: SE APAGA EL LIDER
+[12:29:33.702] ==============================================================================
+[12:29:33.702] Se desconecta al lider nodo-2. La red descartara todos sus
+[12:29:33.702] mensajes en ambos sentidos, por lo que dejaran de llegar latidos.
+[12:29:33.702] Los seguidores deberian detectarlo al expirar su election timeout.
+[12:29:33.702] 
+[12:29:34.203] 
+[12:29:34.203] ==============================================================================
+[12:29:34.203] FASE 4 — DETECCION DEL FALLO Y ELECCION DE UN NUEVO LIDER
+[12:29:34.203] ==============================================================================
+[12:29:35.231]  nodo-4 | T2  | CANDIDATE | ** ELECTION TIMEOUT ** inicia eleccion para el term 2 (se auto-vota, 1/3 votos necesarios)
+[12:29:35.243]  nodo-1 | T2  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-4)
+[12:29:35.243]  nodo-1 | T2  | FOLLOWER  | RequestVote de nodo-4 (term 2) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:35.253]  nodo-4 | T2  | CANDIDATE | recibe voto de nodo-1 (2/3 necesarios)
+[12:29:35.262]  nodo-3 | T2  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-4)
+[12:29:35.262]  nodo-3 | T2  | FOLLOWER  | RequestVote de nodo-4 (term 2) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:35.262]  nodo-5 | T2  | FOLLOWER  | -> pasa a FOLLOWER (vio term superior de nodo-4)
+[12:29:35.262]  nodo-5 | T2  | FOLLOWER  | RequestVote de nodo-4 (term 2) -> VOTO CONCEDIDO: log del candidato al dia
+[12:29:35.286]  nodo-4 | T2  | CANDIDATE | recibe voto de nodo-5 (3/3 necesarios)
+[12:29:35.287]  nodo-4 | T2  | LEADER    | *** ELECTO LIDER del term 2 con 3/5 votos ***
+[12:29:35.931] 
+[12:29:35.931] >>> RESULTADO FASE 4: nuevo lider = nodo-4 (term 2). El cluster sobrevivio al fallo porque 4 de 5 nodos siguen vivos (quorum = 3).
+[12:29:35.931] 
+[12:29:35.931] --- ESTADO TRAS LA SEGUNDA ELECCION ---
+[12:29:35.931] NODO     ESTADO     TERM  COMMIT  LOG                         MAQUINA DE ESTADOS
+[12:29:35.931] nodo-1   FOLLOWER   2     1       A=1                         {'A': '1'}
+[12:29:35.931] nodo-2   (CAIDO)    -     -       -                           -
+[12:29:35.931] nodo-3   FOLLOWER   2     1       A=1                         {'A': '1'}
+[12:29:35.931] nodo-4   LEADER     2     1       A=1                         {'A': '1'}
+[12:29:35.931] nodo-5   FOLLOWER   2     1       A=1                         {'A': '1'}
+[12:29:35.931] 
+[12:29:35.931] 
+[12:29:35.932] ==============================================================================
+[12:29:35.932] FASE 5 — EL SISTEMA SIGUE OPERATIVO: NUEVA PROPUESTA 'B=2'
+[12:29:35.932] ==============================================================================
+[12:29:35.932] Con nodo-2 aun caido, el cliente propone B=2 al nuevo lider.
+[12:29:35.932] 
+[12:29:35.932]  nodo-4 | T2  | LEADER    | >>> PROPUESTA DEL CLIENTE 'B=2' aceptada como entrada #2 (term 2); replicando...
+[12:29:35.939]  nodo-5 | T2  | FOLLOWER  | replica 1 entrada(s) de nodo-4: ['B=2'] -> log=2 entradas
+[12:29:35.945]  nodo-3 | T2  | FOLLOWER  | replica 1 entrada(s) de nodo-4: ['B=2'] -> log=2 entradas
+[12:29:35.960]  nodo-1 | T2  | FOLLOWER  | replica 1 entrada(s) de nodo-4: ['B=2'] -> log=2 entradas
+[12:29:35.974]  nodo-4 | T2  | LEADER    | ### CONSENSO ALCANZADO ### entrada #2 'B=2' replicada en 3/5 nodos (mayoria) -> COMMIT
+[12:29:35.975]  nodo-4 | T2  | LEADER    | aplica entrada #2 'B=2' -> estado={'A': '1', 'B': '2'}
+[12:29:36.357]  nodo-1 | T2  | FOLLOWER  | aplica entrada #2 'B=2' -> estado={'A': '1', 'B': '2'}
+[12:29:36.369]  nodo-3 | T2  | FOLLOWER  | aplica entrada #2 'B=2' -> estado={'A': '1', 'B': '2'}
+[12:29:36.373]  nodo-5 | T2  | FOLLOWER  | aplica entrada #2 'B=2' -> estado={'A': '1', 'B': '2'}
+[12:29:37.932] 
+[12:29:37.932] --- ESTADO CON EL NODO CAIDO (obsérvese que sigue habiendo consenso) ---
+[12:29:37.932] NODO     ESTADO     TERM  COMMIT  LOG                         MAQUINA DE ESTADOS
+[12:29:37.933] nodo-1   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:37.933] nodo-2   (CAIDO)    -     -       -                           -
+[12:29:37.933] nodo-3   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:37.933] nodo-4   LEADER     2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:37.933] nodo-5   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:37.933] 
+[12:29:37.933] 
+[12:29:37.933] ==============================================================================
+[12:29:37.933] FASE 6 — RECUPERACION: EL NODO CAIDO SE REINCORPORA
+[12:29:37.933] ==============================================================================
+[12:29:37.933] Se vuelve a conectar nodo-2. Al recibir un AppendEntries con un
+[12:29:37.933] term mayor, reconocera al nuevo lider y se sincronizara: el lider
+[12:29:37.933] le enviara las entradas que le faltan hasta igualar los logs.
+[12:29:37.933] 
+[12:29:37.984]  nodo-2 | T2  | FOLLOWER  | -> pasa a FOLLOWER (respuesta con term superior)
+[12:29:37.999]  nodo-2 | T2  | FOLLOWER  | replica 1 entrada(s) de nodo-4: ['B=2'] -> log=2 entradas
+[12:29:37.999]  nodo-2 | T2  | FOLLOWER  | aplica entrada #2 'B=2' -> estado={'A': '1', 'B': '2'}
+[12:29:40.933] 
+[12:29:40.934] --- ESTADO TRAS LA RECUPERACION ---
+[12:29:40.934] NODO     ESTADO     TERM  COMMIT  LOG                         MAQUINA DE ESTADOS
+[12:29:40.934] nodo-1   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:40.934] nodo-2   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:40.934] nodo-3   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:40.934] nodo-4   LEADER     2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:40.934] nodo-5   FOLLOWER   2     2       A=1, B=2                    {'A': '1', 'B': '2'}
+[12:29:40.934] 
+[12:29:40.934] 
+[12:29:40.934] ==============================================================================
+[12:29:40.934] FASE 7 — VERIFICACION FINAL DE CONSISTENCIA
+[12:29:40.934] ==============================================================================
+[12:29:40.934]   nodo-1: log=['A=1', 'B=2']  estado={'A': '1', 'B': '2'}
+[12:29:40.934]   nodo-2: log=['A=1', 'B=2']  estado={'A': '1', 'B': '2'}
+[12:29:40.934]   nodo-3: log=['A=1', 'B=2']  estado={'A': '1', 'B': '2'}
+[12:29:40.934]   nodo-4: log=['A=1', 'B=2']  estado={'A': '1', 'B': '2'}
+[12:29:40.934]   nodo-5: log=['A=1', 'B=2']  estado={'A': '1', 'B': '2'}
+[12:29:40.934] 
+[12:29:40.934] Mensajes entregados por la red : 184
+[12:29:40.934] Mensajes descartados por fallos: 8
+[12:29:40.934] 
+[12:29:40.935] RESULTADO: TODAS LAS REPLICAS COINCIDEN. El consenso se mantuvo
+[12:29:40.935] a pesar del fallo del lider (propiedad de State Machine Safety).
+[12:29:40.935] ==============================================================================

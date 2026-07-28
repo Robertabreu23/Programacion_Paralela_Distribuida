@@ -1,0 +1,145 @@
+
+==============================================================================
+FASE A — CONSENSO NORMAL CON 5 ACEPTADORES SANOS
+==============================================================================
+El proposer P1 intenta que el cluster acuerde el valor 'A=1'.
+
+[PROPOSER-1] Cliente solicita acordar 'A=1'. Numero de propuesta n=3. Quorum = 3/5.
+  --- FASE 1: PREPARE(3) enviado a los 5 aceptadores ---
+    acc-1: PROMISE(3) concedida; nunca ha aceptado nada
+    acc-2: PROMISE(3) concedida; nunca ha aceptado nada
+    acc-3: PROMISE(3) concedida; nunca ha aceptado nada
+    acc-4: PROMISE(3) concedida; nunca ha aceptado nada
+    acc-5: PROMISE(3) concedida; nunca ha aceptado nada
+  >> FASE 1 EXITOSA: 5 promesas obtenidas (se necesitaban 3).
+  -- Ningun aceptador tenia valor previo: se propone el valor propio 'A=1'.
+  --- FASE 2: ACCEPT(3, 'A=1') enviado a los aceptadores ---
+    acc-1: ACCEPTED(3, 'A=1')
+    acc-2: ACCEPTED(3, 'A=1')
+    acc-3: ACCEPTED(3, 'A=1')
+    acc-4: ACCEPTED(3, 'A=1')
+    acc-5: ACCEPTED(3, 'A=1')
+  >> FASE 2 EXITOSA: 5 aceptaciones (se necesitaban 3).
+  ### VALOR ELEGIDO (CHOSEN) = 'A=1' ###
+    LEARNER: valor aprendido y aplicado -> 'A=1'
+
+  --- ESTADO DE LOS ACEPTADORES ---
+  ACEPTADOR   ESTADO    PROMESA MAX   ACEPTADO (n, valor)
+  acc-1       ACTIVO    3             (3, 'A=1')
+  acc-2       ACTIVO    3             (3, 'A=1')
+  acc-3       ACTIVO    3             (3, 'A=1')
+  acc-4       ACTIVO    3             (3, 'A=1')
+  acc-5       ACTIVO    3             (3, 'A=1')
+
+
+==============================================================================
+FASE B — FALLO SIMULADO: CAEN 2 DE LOS 5 ACEPTADORES
+==============================================================================
+acc-4 y acc-5 dejan de responder. Quedan 3 activos: aun hay quorum (3).
+Ahora un SEGUNDO proposer intenta imponer un valor distinto, 'B=99'.
+Se espera que el protocolo lo obligue a respetar el valor ya elegido.
+
+[PROPOSER-2] Cliente solicita acordar 'B=99'. Numero de propuesta n=4. Quorum = 3/5.
+  --- FASE 1: PREPARE(4) enviado a los 5 aceptadores ---
+    acc-1: PROMISE(4) concedida; ya habia aceptado (3, 'A=1')
+    acc-2: PROMISE(4) concedida; ya habia aceptado (3, 'A=1')
+    acc-3: PROMISE(4) concedida; ya habia aceptado (3, 'A=1')
+    acc-4: [SIN RESPUESTA — nodo caido]
+    acc-5: [SIN RESPUESTA — nodo caido]
+  >> FASE 1 EXITOSA: 3 promesas obtenidas (se necesitaban 3).
+  !! Un aceptador ya habia aceptado ('A=1', n=3).
+  !! REGLA DE PAXOS: PROPOSER-2 DEBE abandonar 'B=99' y reproponer 'A=1'.
+  --- FASE 2: ACCEPT(4, 'A=1') enviado a los aceptadores ---
+    acc-1: ACCEPTED(4, 'A=1')
+    acc-2: ACCEPTED(4, 'A=1')
+    acc-3: ACCEPTED(4, 'A=1')
+    acc-4: [SIN RESPUESTA — nodo caido]
+    acc-5: [SIN RESPUESTA — nodo caido]
+  >> FASE 2 EXITOSA: 3 aceptaciones (se necesitaban 3).
+  ### VALOR ELEGIDO (CHOSEN) = 'A=1' ###
+    LEARNER: valor aprendido y aplicado -> 'A=1'
+
+  --- ESTADO DE LOS ACEPTADORES ---
+  ACEPTADOR   ESTADO    PROMESA MAX   ACEPTADO (n, valor)
+  acc-1       ACTIVO    4             (4, 'A=1')
+  acc-2       ACTIVO    4             (4, 'A=1')
+  acc-3       ACTIVO    4             (4, 'A=1')
+  acc-4       CAIDO     3             (3, 'A=1')
+  acc-5       CAIDO     3             (3, 'A=1')
+
+  >>> Resultado de la FASE B: el valor acordado sigue siendo 'A=1'.
+      El consenso previo es INMUTABLE, aunque el cliente pidiera otra
+      cosa y aunque hubiera nodos caidos.
+
+==============================================================================
+FASE C — FALLO MAYOR: CAE UN TERCER ACEPTADOR (2 DE 5 ACTIVOS)
+==============================================================================
+Con solo 2 aceptadores activos ya no existe mayoria (se requieren 3).
+El protocolo debe DETENERSE sin corromper el valor ya elegido:
+Paxos sacrifica DISPONIBILIDAD antes que CONSISTENCIA (teorema CAP).
+
+[PROPOSER-1] Cliente solicita acordar 'C=7'. Numero de propuesta n=5. Quorum = 3/5.
+  --- FASE 1: PREPARE(5) enviado a los 5 aceptadores ---
+    acc-1: PROMISE(5) concedida; ya habia aceptado (4, 'A=1')
+    acc-2: PROMISE(5) concedida; ya habia aceptado (4, 'A=1')
+    acc-3: [SIN RESPUESTA — nodo caido]
+    acc-4: [SIN RESPUESTA — nodo caido]
+    acc-5: [SIN RESPUESTA — nodo caido]
+  >> FASE 1 FALLIDA: solo 2 promesa(s) de las 3 necesarias. Sin mayoria NO se puede avanzar (se preserva la seguridad, se pierde la disponibilidad).
+
+  --- ESTADO DE LOS ACEPTADORES ---
+  ACEPTADOR   ESTADO    PROMESA MAX   ACEPTADO (n, valor)
+  acc-1       ACTIVO    5             (4, 'A=1')
+  acc-2       ACTIVO    5             (4, 'A=1')
+  acc-3       CAIDO     4             (4, 'A=1')
+  acc-4       CAIDO     3             (3, 'A=1')
+  acc-5       CAIDO     3             (3, 'A=1')
+
+
+==============================================================================
+FASE D — RECUPERACION: LOS ACEPTADORES VUELVEN AL CLUSTER
+==============================================================================
+Los tres aceptadores se reincorporan. Se vuelve a tener quorum.
+Notese que acc-4 y acc-5 NO conocian el valor: la nueva ronda los
+pondra al dia gracias a la regla de reproposicion de la fase 2a.
+
+[PROPOSER-1] Cliente solicita acordar 'D=3'. Numero de propuesta n=7. Quorum = 3/5.
+  --- FASE 1: PREPARE(7) enviado a los 5 aceptadores ---
+    acc-1: PROMISE(7) concedida; ya habia aceptado (4, 'A=1')
+    acc-2: PROMISE(7) concedida; ya habia aceptado (4, 'A=1')
+    acc-3: PROMISE(7) concedida; ya habia aceptado (4, 'A=1')
+    acc-4: PROMISE(7) concedida; ya habia aceptado (3, 'A=1')
+    acc-5: PROMISE(7) concedida; ya habia aceptado (3, 'A=1')
+  >> FASE 1 EXITOSA: 5 promesas obtenidas (se necesitaban 3).
+  !! Un aceptador ya habia aceptado ('A=1', n=4).
+  !! REGLA DE PAXOS: PROPOSER-1 DEBE abandonar 'D=3' y reproponer 'A=1'.
+  --- FASE 2: ACCEPT(7, 'A=1') enviado a los aceptadores ---
+    acc-1: ACCEPTED(7, 'A=1')
+    acc-2: ACCEPTED(7, 'A=1')
+    acc-3: ACCEPTED(7, 'A=1')
+    acc-4: ACCEPTED(7, 'A=1')
+    acc-5: ACCEPTED(7, 'A=1')
+  >> FASE 2 EXITOSA: 5 aceptaciones (se necesitaban 3).
+  ### VALOR ELEGIDO (CHOSEN) = 'A=1' ###
+    LEARNER: valor aprendido y aplicado -> 'A=1'
+
+  --- ESTADO DE LOS ACEPTADORES ---
+  ACEPTADOR   ESTADO    PROMESA MAX   ACEPTADO (n, valor)
+  acc-1       ACTIVO    7             (7, 'A=1')
+  acc-2       ACTIVO    7             (7, 'A=1')
+  acc-3       ACTIVO    7             (7, 'A=1')
+  acc-4       ACTIVO    7             (7, 'A=1')
+  acc-5       ACTIVO    7             (7, 'A=1')
+
+
+==============================================================================
+RESUMEN FINAL
+==============================================================================
+Valor consensuado por el cluster : 'A=1'
+Valor conocido por el learner    : 'A=1'
+
+CONCLUSION: pese a tres intentos de proponer valores distintos
+('B=99', 'C=7', 'D=3') y a la caida de hasta 3 de 5 aceptadores,
+el unico valor jamas elegido fue 'A=1'. Paxos garantiza que un
+valor decidido no puede ser revocado ni sobrescrito.
+==============================================================================
