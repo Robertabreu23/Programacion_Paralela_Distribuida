@@ -1,0 +1,85 @@
+
+=== DEMO: Modelo de Actores con supervision ===
+
+[main] INFO akka.actor.typed.ActorSystem - [SISTEMA] ActorSystem iniciado (cold start) con pool=3
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Pool creado con 3 workers supervisados
+[actor-serverless-akka.actor.default-dispatcher-6] INFO com.universidad.semana14.Worker - [WORKER] worker-2 creado y listo
+[actor-serverless-akka.actor.default-dispatcher-8] INFO com.universidad.semana14.Worker - [WORKER] worker-3 creado y listo
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Worker - [WORKER] worker-1 creado y listo
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='sum' a worker-1
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Worker - [WORKER] worker-1 procesando op='sum' payload='10,20,30,40'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Worker - [WORKER] worker-1 respondio '100'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-1 -> 100
+>> PETICION  : sum('10,20,30,40')
+<< RESPUESTA : {result=100, op=sum, payload=10,20,30,40, ok=true, worker=worker-1, latencyMs=195}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='upper' a worker-2
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-2 procesando op='upper' payload='arquitectura serverless'
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-2 respondio 'ARQUITECTURA SERVERLESS'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-2 -> ARQUITECTURA SERVERLESS
+>> PETICION  : upper('arquitectura serverless')
+<< RESPUESTA : {result=ARQUITECTURA SERVERLESS, op=upper, payload=arquitectura serverless, ok=true, worker=worker-2, latencyMs=2}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='reverse' a worker-3
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-3 procesando op='reverse' payload='actores'
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-3 respondio 'serotca'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-3 -> serotca
+>> PETICION  : reverse('actores')
+<< RESPUESTA : {result=serotca, op=reverse, payload=actores, ok=true, worker=worker-3, latencyMs=1}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='fail' a worker-1
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-1 procesando op='fail' payload='provoca-error'
+[actor-serverless-akka.actor.default-dispatcher-7] WARN com.universidad.semana14.Worker - [WORKER] worker-1 recibio PreRestart: el supervisor lo esta reiniciando
+[actor-serverless-akka.actor.default-dispatcher-7] ERROR com.universidad.semana14.Worker - Supervisor RestartSupervisor saw failure [1]: Fallo intencionado en worker-1
+java.lang.IllegalStateException: Fallo intencionado en worker-1
+	at com.universidad.semana14.Worker.onTask(Worker.java:79)
+	at akka.actor.typed.javadsl.BuiltReceive.receive(ReceiveBuilder.scala:211)
+	at akka.actor.typed.javadsl.BuiltReceive.receiveMessage(ReceiveBuilder.scala:200)
+	at akka.actor.typed.javadsl.Receive.receive(Receive.scala:53)
+	at akka.actor.typed.javadsl.AbstractBehavior.receive(AbstractBehavior.scala:64)
+	at akka.actor.typed.Behavior$.interpret(Behavior.scala:274)
+	at akka.actor.typed.Behavior$.interpretMessage(Behavior.scala:230)
+	at akka.actor.typed.internal.InterceptorImpl$$anon$2.apply(InterceptorImpl.scala:57)
+	at akka.actor.typed.internal.RestartSupervisor.aroundReceive(Supervision.scala:279)
+	at akka.actor.typed.internal.InterceptorImpl.receive(InterceptorImpl.scala:85)
+	at akka.actor.typed.Behavior$.interpret(Behavior.scala:274)
+	at akka.actor.typed.Behavior$.interpretMessage(Behavior.scala:230)
+	at akka.actor.typed.internal.adapter.ActorAdapter.handleMessage(ActorAdapter.scala:131)
+	at akka.actor.typed.internal.adapter.ActorAdapter.aroundReceive(ActorAdapter.scala:107)
+	at akka.actor.ActorCell.receiveMessage(ActorCell.scala:579)
+	at akka.actor.ActorCell.invoke(ActorCell.scala:547)
+	at akka.dispatch.Mailbox.processMailbox(Mailbox.scala:270)
+	at akka.dispatch.Mailbox.run(Mailbox.scala:231)
+	at akka.dispatch.Mailbox.exec(Mailbox.scala:243)
+	at java.base/java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool.scan(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Worker - [WORKER] worker-1 creado y listo
+[actor-serverless-akka.actor.default-dispatcher-3] ERROR com.universidad.semana14.Supervisor - [SUPERVISOR] worker-1 fallo (TimeoutException). Akka lo reinicia; respondemos error controlado
+>> PETICION  : fail('provoca-error')
+<< RESPUESTA : {result=El worker fallo y fue reiniciado por el supervisor: Ask timed out on [Actor[akka://actor-serverless/user/worker-1#1364292752]] after [1000 ms]. Message of type [com.universidad.semana14.Worker$Task]. A typical reason for `AskTimeoutException` is that the recipient actor didn't send a reply., op=fail, payload=provoca-error, ok=false, worker=worker-1, latencyMs=1020}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='sum' a worker-2
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-2 procesando op='sum' payload='1,2,3'
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-2 respondio '6'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-2 -> 6
+>> PETICION  : sum('1,2,3')
+<< RESPUESTA : {result=6, op=sum, payload=1,2,3, ok=true, worker=worker-2, latencyMs=1}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='upper' a worker-3
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-3 procesando op='upper' payload='sistema tolerante a fallos'
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-3 respondio 'SISTEMA TOLERANTE A FALLOS'
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-3 -> SISTEMA TOLERANTE A FALLOS
+>> PETICION  : upper('sistema tolerante a fallos')
+<< RESPUESTA : {result=SISTEMA TOLERANTE A FALLOS, op=upper, payload=sistema tolerante a fallos, ok=true, worker=worker-3, latencyMs=1}
+
+[actor-serverless-akka.actor.default-dispatcher-3] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Despachando op='raiz' a worker-1
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Worker - [WORKER] worker-1 procesando op='raiz' payload='9'
+[actor-serverless-akka.actor.default-dispatcher-7] INFO com.universidad.semana14.Supervisor - [SUPERVISOR] Resultado de worker-1 -> Operacion no soportada: raiz
+>> PETICION  : raiz('9')
+<< RESPUESTA : {result=Operacion no soportada: raiz, op=raiz, payload=9, ok=false, worker=worker-1, latencyMs=1}
+
+=== FIN DE LA DEMO: el sistema respondio a TODAS las peticiones ===
+[actor-serverless-akka.actor.default-dispatcher-7] INFO akka.actor.CoordinatedShutdown - Running CoordinatedShutdown with reason [ActorSystemTerminateReason]

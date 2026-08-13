@@ -1,0 +1,12 @@
+com/universidad/semana14/Supervisor$Command.class
+com/universidad/semana14/Supervisor$WorkerReply.class
+com/universidad/semana14/Supervisor$Submit.class
+com/universidad/semana14/Supervisor.class
+com/universidad/semana14/LocalServer.class
+com/universidad/semana14/Worker$Command.class
+com/universidad/semana14/Worker.class
+com/universidad/semana14/ActorService.class
+com/universidad/semana14/LambdaHandler.class
+com/universidad/semana14/Worker$Task.class
+com/universidad/semana14/Worker$Result.class
+com/universidad/semana14/LocalDemo.class

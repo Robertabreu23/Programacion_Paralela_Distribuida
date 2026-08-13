@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.universidad.semana14</groupId>
+  <artifactId>actor-serverless</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  <name>Microservicio Actor Model sobre Serverless</name>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Akka 2.6.21 es la ultima version bajo licencia Apache 2.0 (sin BSL) -->
+    <akka.version>2.6.21</akka.version>
+    <scala.binary.version>2.13</scala.binary.version>
+  </properties>
+
+  <dependencies>
+    <!-- Akka Typed: modelo de actores (creacion, mensajes, supervision) -->
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-actor-typed_${scala.binary.version}</artifactId>
+      <version>${akka.version}</version>
+    </dependency>
+
+    <!-- Backend de logging usado por Akka (slf4j) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+    </dependency>
+
+    <!-- Contrato de AWS Lambda (interfaz RequestStreamHandler, Context) -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+
+    <!-- Serializacion/deserializacion JSON de la peticion y la respuesta HTTP -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.17.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>actor-serverless</finalName>
+    <plugins>
+      <!-- Shade genera un "fat jar" con todas las dependencias: es el
+           artefacto que AWS Lambda necesita para ejecutar el handler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.2</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals><goal>shade</goal></goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <!-- Akka usa ficheros reference.conf que deben concatenarse
+                     al empaquetar, si no el ActorSystem no arranca -->
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>reference.conf</resource>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.universidad.semana14.LocalDemo</mainClass>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Semana 14 - Microservicio basado en el Modelo de Actores (Akka Typed)
+  desplegado como funcion serverless en AWS Lambda con endpoint HTTP publico.
+
+Globals:
+  Function:
+    Timeout: 30          # Segundos maximos por invocacion (el ask interno vence antes)
+    MemorySize: 1024     # Mas memoria = mas CPU: reduce el cold start de la JVM y de Akka
+    Runtime: java17      # Runtime gestionado de Java 17
+
+Resources:
+  ActorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: actor-serverless-semana14
+      # Clase que implementa RequestStreamHandler
+      Handler: com.universidad.semana14.LambdaHandler::handleRequest
+      # Fat jar generado por 'mvn package'
+      CodeUri: target/actor-serverless.jar
+      Environment:
+        Variables:
+          WORKER_POOL_SIZE: '3'   # Numero de actores worker del pool
+      # SnapStart mitiga el arranque en frio de la JVM (opcional, requiere version publicada)
+      # SnapStart:
+      #   ApplyOn: PublishedVersions
+      FunctionUrlConfig:
+        AuthType: NONE            # Endpoint HTTPS publico sin firma (demo academica)
+      Events:
+        ApiEvent:
+          Type: HttpApi           # Alternativa: API Gateway HTTP API
+          Properties:
+            Path: /task
+            Method: POST
+
+Outputs:
+  FunctionUrl:
+    Description: URL directa de la funcion (Lambda Function URL)
+    Value: !GetAtt ActorFunctionUrl.FunctionUrl
+  ApiEndpoint:
+    Description: Endpoint de API Gateway
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/task'

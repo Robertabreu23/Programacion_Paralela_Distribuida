@@ -1,0 +1,18 @@
+$ curl -i -X POST http://localhost:8080/task -d '{"op":"sum","payload":"10,20,30,40"}'
+HTTP/1.1 200 OK
+Date: Wed, 12 Aug 2026 18:58:47 GMT
+Content-type: application/json
+Content-length: 95
+
+{"result":"100","op":"sum","payload":"10,20,30,40","ok":true,"worker":"worker-2","latencyMs":0}
+
+$ curl -i -X POST http://localhost:8080/task -d '{"op":"fail","payload":"boom"}'
+HTTP/1.1 500 Internal Server Error
+Date: Wed, 12 Aug 2026 18:58:48 GMT
+Content-type: application/json
+Content-length: 382
+
+{"result":"El worker fallo y fue reiniciado por el supervisor: Ask timed out on [Actor[akka://actor-serverless/user/worker-3#-1107645875]] after [1000 ms]. Message of type [com.universidad.semana14.Worker$Task]. A typical reason for `AskTimeoutException` is that the recipient actor didn't send a reply.","op":"fail","payload":"boom","ok":false,"worker":"worker-3","latencyMs":1015}
+
+$ curl -X POST http://localhost:8080/task -d '{"op":"upper","payload":"sigue vivo tras el fallo"}'
+{"result":"SIGUE VIVO TRAS EL FALLO","op":"upper","payload":"sigue vivo tras el fallo","ok":true,"worker":"worker-1","latencyMs":0}
